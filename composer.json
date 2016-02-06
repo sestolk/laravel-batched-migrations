@@ -19,7 +19,7 @@
   },
   "autoload": {
     "psr-4": {
-      "sestolk\\BatchedMigrations": "src/"
+      "sestolk\\BatchedMigrations\\": "src/"
     }
   },
   "extra": {
