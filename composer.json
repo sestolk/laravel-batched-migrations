@@ -1,0 +1,31 @@
+{
+  "name": "sestolk/laravel-batched-migrations",
+  "description": "Make sure your database migrations are always unique",
+  "keywords": ["laravel", "batched", "migrations"],
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Sven Stolk",
+      "email": "sven@u-lab.nl"
+    }
+  ],
+  "require": {
+    "php" : ">=5.5.9",
+    "illuminate/database": "5.*",
+    "illuminate/filesystem": "5.*",
+    "illuminate/support": "5.*",
+    "symfony/console": "2.8.*|3.0.*"
+  },
+  "autoload": {
+    "psr-4": {
+      "sestolk\\BatchedMigrations": "src/"
+    }
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "1.0-dev"
+    }
+  },
+  "minimum-stability": "dev"
+}
