@@ -41,6 +41,11 @@
 		protected $filterName;
 
 		/**
+		 * @var array
+		 */
+		protected $filtered;
+
+		/**
 		 * @var boolean
 		 */
 		protected $prefixName;
@@ -61,9 +66,9 @@
 		{
 			parent::__construct( $creator, $composer );
 
-			$this->files = $files;
-
+			$this->files      = $files;
 			$this->filterName = config( 'batched.migrations.filter_name' );
+			$this->filtered   = config( 'batched.migrations.filtered' );
 			$this->prefixName = config( 'batched.migrations.prefix_name' );
 			$this->prefixes   = config( 'batched.migrations.prefixes' );
 		}
@@ -78,6 +83,7 @@
 			if( $this->input->getOption( 'fallback' ) )
 			{
 				parent::fire();
+
 				return;
 			}
 
@@ -85,10 +91,9 @@
 			$files = $this->readMigrationFiles();
 			$name  = $this->setUniqueMigrationName( $name, $files );
 
-			$table = $this->input->getOption( 'table' );
-
+			// start: Original Laravel code
+			$table  = $this->input->getOption( 'table' );
 			$create = $this->input->getOption( 'create' );
-
 			if( !$table && is_string( $create ) )
 			{
 				$table = $create;
@@ -100,6 +105,7 @@
 			$this->writeMigration( $name, $table, $create );
 
 			$this->composer->dumpAutoloads();
+			// end: Original Laravel code
 		}
 
 		/**
@@ -116,10 +122,7 @@
 			{
 				$matches = preg_match_all( '/([0-9]{4}\_[0-9]{2}\_[0-9]{2}\_[0-9]{6})\_([a-zA-Z_]+)([0-9]*)/', $existing, $parts );
 				# File is in the right format
-				if( $matches == 0 )
-				{
-					continue;
-				}
+				if( $matches == 0 ) continue;
 
 				$existingName = trim( $parts[2][0], '_' );
 
@@ -168,23 +171,59 @@
 		}
 
 		/**
+		 * Check if the migration name is in snake case
+		 *
+		 * @param $name
+		 *
+		 * @return bool
+		 */
+		protected function nameIsSnakeCase( $name )
+		{
+			return str_contains( $name, '_' );
+		}
+
+		/**
 		 * Check if the migration name contains the prefix
 		 *
 		 * @param $name
 		 *
 		 * @return bool
 		 */
-		protected function nameContainsPrefix( $name )
+		protected function nameMissesPrefix( $name )
 		{
+			# Do not force name to contain the prefix
+			if( !$this->prefixName || empty( $this->prefixes ) )
+			{
+				return false;
+			}
+
 			foreach( $this->prefixes as $prefix )
 			{
 				if( starts_with( $name, $prefix ) )
 				{
-					return true;
+					return false;
 				}
 			}
 
-			return false;
+			return true;
+		}
+
+		/**
+		 * Check if the migration name does not contain the filtered words
+		 *
+		 * @param $name
+		 *
+		 * @return bool
+		 */
+		protected function nameContainsFiltered( $name )
+		{
+			# Do not check name for filtered words
+			if( !$this->filterName || empty( $this->filtered ) )
+			{
+				return false;
+			}
+
+			return str_contains( $name, $this->filtered );
 		}
 
 		/**
@@ -198,19 +237,19 @@
 			$name = strtolower( $this->input->getArgument( 'name' ) );
 
 			# Name must be snake cased
-			if( !str_contains( $name, '_' ) )
+			if( !$this->nameIsSnakeCase( $name ) )
 			{
 				throw new LogicException( 'The name for the migration must be in snake case and contain at least two words.' );
 			}
 
 			# Migrations should not contain the following words
-			if( $this->filterName && str_contains( $name, [ 'table', 'schema' ] ) )
+			if( $this->nameContainsFiltered( $name ) )
 			{
-				throw new LogicException( 'The name for the migration should not contain the words [table, schema]' );
+				throw new LogicException( 'The name for the migration should not contain the words [' . implode( ', ', $this->filtered ) . ']' );
 			}
 
 			# Migrations should contain one of the following words
-			if( $this->prefixName && !$this->nameContainsPrefix( $name ) )
+			if( $this->nameMissesPrefix( $name ) )
 			{
 				throw new LogicException( 'The name for the migration must be prefixed with one of the following words [' . implode( ', ', $this->prefixes ) . ']' );
 			}
