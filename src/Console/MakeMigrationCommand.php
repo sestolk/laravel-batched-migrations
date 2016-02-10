@@ -71,6 +71,7 @@
 			$this->filtered   = config( 'batched.migrations.filtered' );
 			$this->prefixName = config( 'batched.migrations.prefix_name' );
 			$this->prefixes   = config( 'batched.migrations.prefixes' );
+			$this->nameRegex  = '/([0-9]{4}\_[0-9]{2}\_[0-9]{2}\_[0-9]{6})\_([a-zA-Z_]+)([0-9]*)/';
 		}
 
 		/**
@@ -120,7 +121,7 @@
 		{
 			foreach( $names as $existing )
 			{
-				$matches = preg_match_all( '/([0-9]{4}\_[0-9]{2}\_[0-9]{2}\_[0-9]{6})\_([a-zA-Z_]+)([0-9]*)/', $existing, $parts );
+				$matches = preg_match_all( $this->nameRegex, $existing, $parts );
 				# File is in the right format
 				if( $matches == 0 ) continue;
 
@@ -162,7 +163,7 @@
 			# Only valid migration names 0000_00_00_000000_name_in_snake_case
 			$files = array_filter( $files, function ( $name )
 			{
-				return preg_match( '/([0-9]{4}\_[0-9]{2}\_[0-9]{2}\_[0-9]{6})\_([a-zA-Z]+)/', $name ) === 1;
+				return preg_match( $this->nameRegex, $name ) === 1;
 			} );
 
 			rsort( $files );
