@@ -46,6 +46,8 @@
 		 */
 		public function register()
 		{
+			parent::register();
+
 			$this->mergeConfigFrom( $this->configPath, $this->name );
 
 			$this->app[$this->name . '.make.migration'] = $this->app->share( function ( $app )
