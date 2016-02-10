@@ -3,7 +3,7 @@
 [![Latest Stable Version](https://poser.pugx.org/sestolk/laravel-batched-migrations/v/stable.svg)](https://packagist.org/packages/sestolk/laravel-batched-migrations)
 [![Total Downloads](https://poser.pugx.org/sestolk/laravel-batched-migrations/downloads.svg)](https://packagist.org/packages/sestolk/laravel-batched-migrations)
 
-This package overrides the `make:migration` command and upon calling it applies a number to the end of the file when it already exists. Like so: `2016_01_01_151500_update_schema_table_1.php`
+This package overrides the `make:migration` command and upon calling it applies a number to the end of the file when it already exists. Like so: `2016_01_01_151500_update_users_friends_1.php`
 
 > Please note: This package and its examples are written for a PostgreSQL database. Therefore you frequently see the word **schema**. If you use MySQL or a different database type you can ommit the word **schema** and it will work just fine.
 
